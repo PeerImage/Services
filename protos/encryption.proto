@@ -1,0 +1,19 @@
+syntax = "proto3";
+
+package encryption;
+
+// Service for encrypting and decrypting data
+service Encryption {
+    // Encrypts an image
+    rpc Encrypt(EncryptRequest) returns (EncryptResponse);
+}
+
+message EncryptRequest {
+    // The raw data (bytes) of the image
+    bytes image = 1; 
+}
+
+message EncryptResponse {
+    // The resulting encrypted image
+    bytes encrypted_image = 1;
+}

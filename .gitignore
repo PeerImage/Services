@@ -1,0 +1,39 @@
+# Ignore Cargo build output
+/target/
+**/target/
+
+# Ignore compiled artifacts
+**/*.rlib
+**/*.so
+**/*.dylib
+**/*.dll
+**/*.exe
+
+# Backups and temporary files
+**/*.rs.bk
+*~
+*.swp
+*.swx
+.#*
+
+# Ignore pkg produced by wasm-pack
+/pkg/
+
+# Cargo local cache/credentials
+.cargo/credentials
+.cargo/git/*
+.cargo/registry/*
+
+# IDE/editor configs
+/.idea/
+/.vscode/
+/*.sublime-project
+/*.sublime-workspace
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Environment files
+.env
+.env.*

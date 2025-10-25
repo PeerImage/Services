@@ -4,7 +4,10 @@ package election;
 
 // Messages used for the Bully election algorithm
 message Node {
-  int32 id = 1; // unique numeric id for comparison; higher means higher priority
+  // Unix epoch time in milliseconds used as the node's numeric id.
+  // ms to indicate the time a node was elected as a leader.
+  int64 id = 1; // unix ms timestamp
+
   string addr = 2; // transport address (host:port) to contact this node
 }
 

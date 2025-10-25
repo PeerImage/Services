@@ -27,27 +27,34 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
 	}
 
 	// compile your proto(s)
-    tonic_prost_build::compile_protos("./protos/encryption.proto")?;
+	for p in ["./protos/encryption.proto", "./protos/election.proto"].iter() {
+		tonic_prost_build::compile_protos(p)?;
+	}
 
 	// Ensure Cargo rebuilds when proto changes.
 	println!("cargo:rerun-if-changed=./protos/encryption.proto");
+	println!("cargo:rerun-if-changed=./protos/election.proto");
 	println!("cargo:rerun-if-changed=./protos");
 
-	// Copy the generated file from OUT_DIR to a stable location inside src/.
+	// Copy the generated files from OUT_DIR to a stable location inside src/.
 	// This prevents IDEs / rust-analyzer from choking when OUT_DIR is not set.
 	let out_dir = std::env::var("OUT_DIR")?;
-	let generated_src = Path::new(&out_dir).join("encryption.rs");
 	let dest_dir = Path::new("src").join("generated");
-	let dest = dest_dir.join("encryption.rs");
-
 	fs::create_dir_all(&dest_dir)?;
-	// Copy (overwrite) the generated file into src/generated/encryption.rs
-	fs::copy(&generated_src, &dest).map_err(|e| {
-		format!(
-			"failed to copy generated proto file from {:?} to {:?}: {}",
-			generated_src, dest, e
-		)
-	})?;
+
+	for fname in &["encryption.rs", "election.rs"] {
+		let generated_src = Path::new(&out_dir).join(fname);
+		let dest = dest_dir.join(fname);
+		// If the generated file exists in OUT_DIR, copy it; else ignore (build will fail later if necessary).
+		if generated_src.exists() {
+			fs::copy(&generated_src, &dest).map_err(|e| {
+				format!(
+					"failed to copy generated proto file from {:?} to {:?}: {}",
+					generated_src, dest, e
+				)
+			})?;
+		}
+	}
 
 	Ok(())
 }

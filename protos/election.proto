@@ -1,0 +1,41 @@
+syntax = "proto3";
+
+package election;
+
+// Messages used for the Bully election algorithm
+message Node {
+  int32 id = 1; // unique numeric id for comparison; higher means higher priority
+  string addr = 2; // transport address (host:port) to contact this node
+}
+
+message ElectionRequest {
+  Node from = 1; // who is starting the election
+}
+
+message ElectionResponse {
+  bool ok = 1; // indicates higher-id node is alive and will take over election
+}
+
+message Coordinator {
+  Node leader = 1; // announced leader node
+}
+
+message PingRequest {
+  Node from = 1;
+}
+
+message PingResponse {
+  bool alive = 1;
+}
+
+// Service exposing the basic RPCs used by the Bully algorithm.
+service Bully {
+  // Called by a node to notify higher-id nodes that it starts an election.
+  rpc Election(ElectionRequest) returns (ElectionResponse);
+
+  // Announces the final leader to all nodes.
+  rpc AnnounceCoordinator(Coordinator) returns (PingResponse);
+
+  // Simple ping used to check aliveness.
+  rpc Ping(PingRequest) returns (PingResponse);
+}

@@ -4,3 +4,10 @@
 pub mod encryption_service {
 	include!("generated/encryption.rs");
 }
+
+pub mod election_service {
+    include!("generated/election.rs");
+}
+
+mod election;
+pub use election::*;

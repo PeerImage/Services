@@ -2,9 +2,12 @@
 /// Messages used for the Bully election algorithm
 #[derive(Clone, PartialEq, Eq, Hash, ::prost::Message)]
 pub struct Node {
-    /// unique numeric id for comparison; higher means higher priority
-    #[prost(int32, tag = "1")]
-    pub id: i32,
+    /// Unix epoch time in milliseconds used as the node's numeric id.
+    /// ms to indicate the time a node was elected as a leader.
+    ///
+    /// unix ms timestamp
+    #[prost(int64, tag = "1")]
+    pub id: i64,
     /// transport address (host:port) to contact this node
     #[prost(string, tag = "2")]
     pub addr: ::prost::alloc::string::String,
@@ -15,11 +18,14 @@ pub struct ElectionRequest {
     #[prost(message, optional, tag = "1")]
     pub from: ::core::option::Option<Node>,
 }
-#[derive(Clone, Copy, PartialEq, Eq, Hash, ::prost::Message)]
+#[derive(Clone, PartialEq, Eq, Hash, ::prost::Message)]
 pub struct ElectionResponse {
     /// indicates higher-id node is alive and will take over election
     #[prost(bool, tag = "1")]
     pub ok: bool,
+    /// the responding node with current ID (Modified Bully Step 2(ii))
+    #[prost(message, optional, tag = "2")]
+    pub responder: ::core::option::Option<Node>,
 }
 #[derive(Clone, PartialEq, Eq, Hash, ::prost::Message)]
 pub struct Coordinator {
@@ -173,6 +179,29 @@ pub mod bully_client {
                 .insert(GrpcMethod::new("election.Bully", "AnnounceCoordinator"));
             self.inner.unary(req, path, codec).await
         }
+        /// Modified Bully Step 2(iv): Notify a node that it should become coordinator
+        /// and validate itself before announcing.
+        pub async fn notify_coordinator(
+            &mut self,
+            request: impl tonic::IntoRequest<super::Coordinator>,
+        ) -> std::result::Result<tonic::Response<super::PingResponse>, tonic::Status> {
+            self.inner
+                .ready()
+                .await
+                .map_err(|e| {
+                    tonic::Status::unknown(
+                        format!("Service was not ready: {}", e.into()),
+                    )
+                })?;
+            let codec = tonic_prost::ProstCodec::default();
+            let path = http::uri::PathAndQuery::from_static(
+                "/election.Bully/NotifyCoordinator",
+            );
+            let mut req = request.into_request();
+            req.extensions_mut()
+                .insert(GrpcMethod::new("election.Bully", "NotifyCoordinator"));
+            self.inner.unary(req, path, codec).await
+        }
         /// Simple ping used to check aliveness.
         pub async fn ping(
             &mut self,
@@ -217,6 +246,12 @@ pub mod bully_server {
         >;
         /// Announces the final leader to all nodes.
         async fn announce_coordinator(
+            &self,
+            request: tonic::Request<super::Coordinator>,
+        ) -> std::result::Result<tonic::Response<super::PingResponse>, tonic::Status>;
+        /// Modified Bully Step 2(iv): Notify a node that it should become coordinator
+        /// and validate itself before announcing.
+        async fn notify_coordinator(
             &self,
             request: tonic::Request<super::Coordinator>,
         ) -> std::result::Result<tonic::Response<super::PingResponse>, tonic::Status>;
@@ -374,6 +409,49 @@ pub mod bully_server {
                     let inner = self.inner.clone();
                     let fut = async move {
                         let method = AnnounceCoordinatorSvc(inner);
+                        let codec = tonic_prost::ProstCodec::default();
+                        let mut grpc = tonic::server::Grpc::new(codec)
+                            .apply_compression_config(
+                                accept_compression_encodings,
+                                send_compression_encodings,
+                            )
+                            .apply_max_message_size_config(
+                                max_decoding_message_size,
+                                max_encoding_message_size,
+                            );
+                        let res = grpc.unary(method, req).await;
+                        Ok(res)
+                    };
+                    Box::pin(fut)
+                }
+                "/election.Bully/NotifyCoordinator" => {
+                    #[allow(non_camel_case_types)]
+                    struct NotifyCoordinatorSvc<T: Bully>(pub Arc<T>);
+                    impl<T: Bully> tonic::server::UnaryService<super::Coordinator>
+                    for NotifyCoordinatorSvc<T> {
+                        type Response = super::PingResponse;
+                        type Future = BoxFuture<
+                            tonic::Response<Self::Response>,
+                            tonic::Status,
+                        >;
+                        fn call(
+                            &mut self,
+                            request: tonic::Request<super::Coordinator>,
+                        ) -> Self::Future {
+                            let inner = Arc::clone(&self.0);
+                            let fut = async move {
+                                <T as Bully>::notify_coordinator(&inner, request).await
+                            };
+                            Box::pin(fut)
+                        }
+                    }
+                    let accept_compression_encodings = self.accept_compression_encodings;
+                    let send_compression_encodings = self.send_compression_encodings;
+                    let max_decoding_message_size = self.max_decoding_message_size;
+                    let max_encoding_message_size = self.max_encoding_message_size;
+                    let inner = self.inner.clone();
+                    let fut = async move {
+                        let method = NotifyCoordinatorSvc(inner);
                         let codec = tonic_prost::ProstCodec::default();
                         let mut grpc = tonic::server::Grpc::new(codec)
                             .apply_compression_config(

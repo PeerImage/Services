@@ -17,6 +17,7 @@ message ElectionRequest {
 
 message ElectionResponse {
   bool ok = 1; // indicates higher-id node is alive and will take over election
+  Node responder = 2; // the responding node with current ID (Modified Bully Step 2(ii))
 }
 
 message Coordinator {
@@ -38,6 +39,10 @@ service Bully {
 
   // Announces the final leader to all nodes.
   rpc AnnounceCoordinator(Coordinator) returns (PingResponse);
+
+  // Modified Bully Step 2(iv): Notify a node that it should become coordinator
+  // and validate itself before announcing.
+  rpc NotifyCoordinator(Coordinator) returns (PingResponse);
 
   // Simple ping used to check aliveness.
   rpc Ping(PingRequest) returns (PingResponse);

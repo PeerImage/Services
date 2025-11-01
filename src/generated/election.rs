@@ -157,7 +157,7 @@ pub mod bully_client {
             req.extensions_mut().insert(GrpcMethod::new("election.Bully", "Election"));
             self.inner.unary(req, path, codec).await
         }
-        /// Announces the final leader to all nodes.
+        /// Announces the final leader to all nodes. Leader sends to all peers announcing they're winning.
         pub async fn announce_coordinator(
             &mut self,
             request: impl tonic::IntoRequest<super::Coordinator>,
@@ -244,7 +244,7 @@ pub mod bully_server {
             tonic::Response<super::ElectionResponse>,
             tonic::Status,
         >;
-        /// Announces the final leader to all nodes.
+        /// Announces the final leader to all nodes. Leader sends to all peers announcing they're winning.
         async fn announce_coordinator(
             &self,
             request: tonic::Request<super::Coordinator>,

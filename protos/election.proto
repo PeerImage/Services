@@ -37,7 +37,7 @@ service Bully {
   // Called by a node to notify higher-id nodes that it starts an election.
   rpc Election(ElectionRequest) returns (ElectionResponse);
 
-  // Announces the final leader to all nodes.
+  // Announces the final leader to all nodes. Leader sends to all peers announcing they're winning.
   rpc AnnounceCoordinator(Coordinator) returns (PingResponse);
 
   // Modified Bully Step 2(iv): Notify a node that it should become coordinator

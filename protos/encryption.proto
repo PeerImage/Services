@@ -4,8 +4,33 @@ package encryption;
 
 // Service for encrypting and decrypting data
 service Encryption {
-    // Encrypts an image
+    // Client asks for the current leader
+    rpc GetLeader(GetLeaderRequest) returns (GetLeaderResponse);
+    
+    // Encrypts an image (only leader processes this)
     rpc Encrypt(EncryptRequest) returns (EncryptResponse);
+}
+
+message GetLeaderRequest {
+    // Empty - just asking who the leader is
+}
+
+message GetLeaderResponse {
+    // Status of the cluster
+    oneof status {
+        LeaderInfo leader = 1;      // Leader is available
+        ElectionInProgress wait = 2; // Election ongoing, client should wait
+    }
+}
+
+message LeaderInfo {
+    string address = 1;  // IP:Port of the leader
+    float load = 2;      // Current load percentage
+}
+
+message ElectionInProgress {
+    string message = 1;  // "Election in progress, please retry"
+    uint32 estimated_wait_seconds = 2;  // Estimated time until election completes
 }
 
 message EncryptRequest {

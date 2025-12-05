@@ -27,13 +27,14 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
 	}
 
 	// compile your proto(s)
-	for p in ["./protos/encryption.proto", "./protos/election.proto"].iter() {
+	for p in ["./protos/encryption.proto", "./protos/election.proto", "./protos/directoryofservice.proto"].iter() {
 		tonic_prost_build::compile_protos(p)?;
 	}
 
 	// Ensure Cargo rebuilds when proto changes.
 	println!("cargo:rerun-if-changed=./protos/encryption.proto");
 	println!("cargo:rerun-if-changed=./protos/election.proto");
+	println!("cargo:rerun-if-changed=./protos/directoryofservice.proto");
 	println!("cargo:rerun-if-changed=./protos");
 
 	// Copy the generated files from OUT_DIR to a stable location inside src/.
@@ -42,7 +43,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
 	let dest_dir = Path::new("src").join("generated");
 	fs::create_dir_all(&dest_dir)?;
 
-	for fname in &["encryption.rs", "election.rs"] {
+	for fname in &["encryption.rs", "election.rs", "directoryofservice.rs"] {
 		let generated_src = Path::new(&out_dir).join(fname);
 		let dest = dest_dir.join(fname);
 		// If the generated file exists in OUT_DIR, copy it; else ignore (build will fail later if necessary).

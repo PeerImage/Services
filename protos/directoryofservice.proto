@@ -1,0 +1,64 @@
+syntax = "proto3";
+
+package directoryofservice;
+
+// Peer represents an online peer in the directory.
+message Peer {
+  string ip = 1;        // IP address of the peer
+  string username = 2;  // Username of the peer
+}
+
+// RequestType enumerates the different types of requests that can be pending.
+enum RequestType {
+  FRIEND_REQUEST = 0;
+  IMAGE_REQUEST = 1;
+  VIEWS_COUNT_EDIT_REQUEST = 2;
+  USERS_PERMISSION_REQUEST = 3;
+}
+
+// Request represents a pending request in the directory.
+message Request {
+  string from_username = 1;     // Username of the requester
+  string to_username = 2;       // Username of the recipient
+  RequestType request_type = 3; // Type of the request
+
+  // Optional: Image IDs involved in the request.
+  // Used for IMAGE_REQUEST, VIEWS_COUNT_EDIT_REQUEST, and USERS_PERMISSION_REQUEST.
+  repeated string image_id = 4;
+
+  // Optional: Updated view count.
+  // Only used for VIEWS_COUNT_EDIT_REQUEST.
+  optional int32 updated_view_count = 5;
+
+  int64 timestamp = 6; // Unix timestamp (ms or seconds) when the request was created
+}
+
+// Request message for getting online peers (can be empty or contain filters).
+message GetOnlinePeersRequest {
+  // Could add optional filters here if needed (e.g., by username pattern)
+}
+
+// Response containing the list of online peers.
+message GetOnlinePeersResponse {
+  repeated Peer peers = 1;
+}
+
+// Request message for getting pending requests.
+message GetPendingRequestsRequest {
+  // Optional: filter by username to get requests for a specific user
+  optional string username = 1;
+}
+
+// Response containing the list of pending requests.
+message GetPendingRequestsResponse {
+  repeated Request requests = 1;
+}
+
+// DirectoryOfService provides methods to query the directory for peers and requests.
+service DirectoryOfService {
+  // Get the list of currently online peers.
+  rpc GetOnlinePeers(GetOnlinePeersRequest) returns (GetOnlinePeersResponse);
+
+  // Get the list of pending requests from the directory.
+  rpc GetPendingRequests(GetPendingRequestsRequest) returns (GetPendingRequestsResponse);
+}

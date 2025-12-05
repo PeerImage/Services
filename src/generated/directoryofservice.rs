@@ -25,6 +25,10 @@ pub struct Request {
     /// Used for IMAGE_REQUEST, VIEWS_COUNT_EDIT_REQUEST, and USERS_PERMISSION_REQUEST.
     #[prost(string, repeated, tag = "4")]
     pub image_id: ::prost::alloc::vec::Vec<::prost::alloc::string::String>,
+    /// Optional: View counts corresponding to each image_id.
+    /// Must match the size of image_id list. Each index corresponds to the view count for that image.
+    #[prost(int32, repeated, tag = "7")]
+    pub number_of_views: ::prost::alloc::vec::Vec<i32>,
     /// Optional: Updated view count.
     /// Only used for VIEWS_COUNT_EDIT_REQUEST.
     #[prost(int32, optional, tag = "5")]

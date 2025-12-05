@@ -8,3 +8,7 @@ pub mod encryption_service {
 pub mod election_service {
     include!("generated/election.rs");
 }
+
+pub mod directory_of_service {
+    include!("generated/directoryofservice.rs");
+}

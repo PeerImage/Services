@@ -29,6 +29,18 @@ message Request {
   int64 timestamp = 6; // Unix timestamp (ms or seconds) when the request was created
 }
 
+// Request message for registering a peer.
+message RegisterPeerRequest {
+  string ip = 1;        // IP address of the peer
+  string username = 2;  // Username of the peer
+}
+
+// Response for peer registration.
+message RegisterPeerResponse {
+  bool success = 1;     // Whether the peer was successfully registered
+  string message = 2;   // Optional message (e.g., error description or confirmation)
+}
+
 // Request message for client heartbeat.
 message HeartbeatRequest {
   string ip = 1;        // IP address of the client
@@ -74,6 +86,9 @@ message AddPendingRequestResponse {
 
 // DirectoryOfService provides methods to query the directory for peers and requests.
 service DirectoryOfService {
+  // Register a peer with the directory service.
+  rpc RegisterPeer(RegisterPeerRequest) returns (RegisterPeerResponse);
+  
   // Send a heartbeat to indicate the client is still online.
   rpc Heartbeat(HeartbeatRequest) returns (HeartbeatResponse);
   

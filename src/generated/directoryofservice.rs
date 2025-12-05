@@ -33,6 +33,26 @@ pub struct Request {
     #[prost(int64, tag = "6")]
     pub timestamp: i64,
 }
+/// Request message for registering a peer.
+#[derive(Clone, PartialEq, Eq, Hash, ::prost::Message)]
+pub struct RegisterPeerRequest {
+    /// IP address of the peer
+    #[prost(string, tag = "1")]
+    pub ip: ::prost::alloc::string::String,
+    /// Username of the peer
+    #[prost(string, tag = "2")]
+    pub username: ::prost::alloc::string::String,
+}
+/// Response for peer registration.
+#[derive(Clone, PartialEq, Eq, Hash, ::prost::Message)]
+pub struct RegisterPeerResponse {
+    /// Whether the peer was successfully registered
+    #[prost(bool, tag = "1")]
+    pub success: bool,
+    /// Optional message (e.g., error description or confirmation)
+    #[prost(string, tag = "2")]
+    pub message: ::prost::alloc::string::String,
+}
 /// Request message for client heartbeat.
 #[derive(Clone, PartialEq, Eq, Hash, ::prost::Message)]
 pub struct HeartbeatRequest {
@@ -215,6 +235,36 @@ pub mod directory_of_service_client {
             self.inner = self.inner.max_encoding_message_size(limit);
             self
         }
+        /// Register a peer with the directory service.
+        pub async fn register_peer(
+            &mut self,
+            request: impl tonic::IntoRequest<super::RegisterPeerRequest>,
+        ) -> std::result::Result<
+            tonic::Response<super::RegisterPeerResponse>,
+            tonic::Status,
+        > {
+            self.inner
+                .ready()
+                .await
+                .map_err(|e| {
+                    tonic::Status::unknown(
+                        format!("Service was not ready: {}", e.into()),
+                    )
+                })?;
+            let codec = tonic_prost::ProstCodec::default();
+            let path = http::uri::PathAndQuery::from_static(
+                "/directoryofservice.DirectoryOfService/RegisterPeer",
+            );
+            let mut req = request.into_request();
+            req.extensions_mut()
+                .insert(
+                    GrpcMethod::new(
+                        "directoryofservice.DirectoryOfService",
+                        "RegisterPeer",
+                    ),
+                );
+            self.inner.unary(req, path, codec).await
+        }
         /// Send a heartbeat to indicate the client is still online.
         pub async fn heartbeat(
             &mut self,
@@ -347,6 +397,14 @@ pub mod directory_of_service_server {
     /// Generated trait containing gRPC methods that should be implemented for use with DirectoryOfServiceServer.
     #[async_trait]
     pub trait DirectoryOfService: std::marker::Send + std::marker::Sync + 'static {
+        /// Register a peer with the directory service.
+        async fn register_peer(
+            &self,
+            request: tonic::Request<super::RegisterPeerRequest>,
+        ) -> std::result::Result<
+            tonic::Response<super::RegisterPeerResponse>,
+            tonic::Status,
+        >;
         /// Send a heartbeat to indicate the client is still online.
         async fn heartbeat(
             &self,
@@ -457,6 +515,52 @@ pub mod directory_of_service_server {
         }
         fn call(&mut self, req: http::Request<B>) -> Self::Future {
             match req.uri().path() {
+                "/directoryofservice.DirectoryOfService/RegisterPeer" => {
+                    #[allow(non_camel_case_types)]
+                    struct RegisterPeerSvc<T: DirectoryOfService>(pub Arc<T>);
+                    impl<
+                        T: DirectoryOfService,
+                    > tonic::server::UnaryService<super::RegisterPeerRequest>
+                    for RegisterPeerSvc<T> {
+                        type Response = super::RegisterPeerResponse;
+                        type Future = BoxFuture<
+                            tonic::Response<Self::Response>,
+                            tonic::Status,
+                        >;
+                        fn call(
+                            &mut self,
+                            request: tonic::Request<super::RegisterPeerRequest>,
+                        ) -> Self::Future {
+                            let inner = Arc::clone(&self.0);
+                            let fut = async move {
+                                <T as DirectoryOfService>::register_peer(&inner, request)
+                                    .await
+                            };
+                            Box::pin(fut)
+                        }
+                    }
+                    let accept_compression_encodings = self.accept_compression_encodings;
+                    let send_compression_encodings = self.send_compression_encodings;
+                    let max_decoding_message_size = self.max_decoding_message_size;
+                    let max_encoding_message_size = self.max_encoding_message_size;
+                    let inner = self.inner.clone();
+                    let fut = async move {
+                        let method = RegisterPeerSvc(inner);
+                        let codec = tonic_prost::ProstCodec::default();
+                        let mut grpc = tonic::server::Grpc::new(codec)
+                            .apply_compression_config(
+                                accept_compression_encodings,
+                                send_compression_encodings,
+                            )
+                            .apply_max_message_size_config(
+                                max_decoding_message_size,
+                                max_encoding_message_size,
+                            );
+                        let res = grpc.unary(method, req).await;
+                        Ok(res)
+                    };
+                    Box::pin(fut)
+                }
                 "/directoryofservice.DirectoryOfService/Heartbeat" => {
                     #[allow(non_camel_case_types)]
                     struct HeartbeatSvc<T: DirectoryOfService>(pub Arc<T>);

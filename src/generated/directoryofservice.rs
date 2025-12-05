@@ -33,6 +33,23 @@ pub struct Request {
     #[prost(int64, tag = "6")]
     pub timestamp: i64,
 }
+/// Request message for client heartbeat.
+#[derive(Clone, PartialEq, Eq, Hash, ::prost::Message)]
+pub struct HeartbeatRequest {
+    /// IP address of the client
+    #[prost(string, tag = "1")]
+    pub ip: ::prost::alloc::string::String,
+    /// Username of the client
+    #[prost(string, tag = "2")]
+    pub username: ::prost::alloc::string::String,
+}
+/// Response for heartbeat confirmation.
+#[derive(Clone, Copy, PartialEq, Eq, Hash, ::prost::Message)]
+pub struct HeartbeatResponse {
+    /// Whether the heartbeat was successfully recorded
+    #[prost(bool, tag = "1")]
+    pub success: bool,
+}
 /// Request message for getting online peers (can be empty or contain filters).
 ///
 /// Could add optional filters here if needed (e.g., by username pattern)
@@ -56,6 +73,22 @@ pub struct GetPendingRequestsRequest {
 pub struct GetPendingRequestsResponse {
     #[prost(message, repeated, tag = "1")]
     pub requests: ::prost::alloc::vec::Vec<Request>,
+}
+/// Request message for adding a pending request.
+#[derive(Clone, PartialEq, Eq, Hash, ::prost::Message)]
+pub struct AddPendingRequestRequest {
+    #[prost(message, optional, tag = "1")]
+    pub request: ::core::option::Option<Request>,
+}
+/// Response for adding a pending request.
+#[derive(Clone, PartialEq, Eq, Hash, ::prost::Message)]
+pub struct AddPendingRequestResponse {
+    /// Whether the request was successfully added
+    #[prost(bool, tag = "1")]
+    pub success: bool,
+    /// Optional message (e.g., error description)
+    #[prost(string, tag = "2")]
+    pub message: ::prost::alloc::string::String,
 }
 /// RequestType enumerates the different types of requests that can be pending.
 #[derive(Clone, Copy, Debug, PartialEq, Eq, Hash, PartialOrd, Ord, ::prost::Enumeration)]
@@ -182,6 +215,33 @@ pub mod directory_of_service_client {
             self.inner = self.inner.max_encoding_message_size(limit);
             self
         }
+        /// Send a heartbeat to indicate the client is still online.
+        pub async fn heartbeat(
+            &mut self,
+            request: impl tonic::IntoRequest<super::HeartbeatRequest>,
+        ) -> std::result::Result<
+            tonic::Response<super::HeartbeatResponse>,
+            tonic::Status,
+        > {
+            self.inner
+                .ready()
+                .await
+                .map_err(|e| {
+                    tonic::Status::unknown(
+                        format!("Service was not ready: {}", e.into()),
+                    )
+                })?;
+            let codec = tonic_prost::ProstCodec::default();
+            let path = http::uri::PathAndQuery::from_static(
+                "/directoryofservice.DirectoryOfService/Heartbeat",
+            );
+            let mut req = request.into_request();
+            req.extensions_mut()
+                .insert(
+                    GrpcMethod::new("directoryofservice.DirectoryOfService", "Heartbeat"),
+                );
+            self.inner.unary(req, path, codec).await
+        }
         /// Get the list of currently online peers.
         pub async fn get_online_peers(
             &mut self,
@@ -242,6 +302,36 @@ pub mod directory_of_service_client {
                 );
             self.inner.unary(req, path, codec).await
         }
+        /// Add a new pending request to the directory.
+        pub async fn add_pending_request(
+            &mut self,
+            request: impl tonic::IntoRequest<super::AddPendingRequestRequest>,
+        ) -> std::result::Result<
+            tonic::Response<super::AddPendingRequestResponse>,
+            tonic::Status,
+        > {
+            self.inner
+                .ready()
+                .await
+                .map_err(|e| {
+                    tonic::Status::unknown(
+                        format!("Service was not ready: {}", e.into()),
+                    )
+                })?;
+            let codec = tonic_prost::ProstCodec::default();
+            let path = http::uri::PathAndQuery::from_static(
+                "/directoryofservice.DirectoryOfService/AddPendingRequest",
+            );
+            let mut req = request.into_request();
+            req.extensions_mut()
+                .insert(
+                    GrpcMethod::new(
+                        "directoryofservice.DirectoryOfService",
+                        "AddPendingRequest",
+                    ),
+                );
+            self.inner.unary(req, path, codec).await
+        }
     }
 }
 /// Generated server implementations.
@@ -257,6 +347,14 @@ pub mod directory_of_service_server {
     /// Generated trait containing gRPC methods that should be implemented for use with DirectoryOfServiceServer.
     #[async_trait]
     pub trait DirectoryOfService: std::marker::Send + std::marker::Sync + 'static {
+        /// Send a heartbeat to indicate the client is still online.
+        async fn heartbeat(
+            &self,
+            request: tonic::Request<super::HeartbeatRequest>,
+        ) -> std::result::Result<
+            tonic::Response<super::HeartbeatResponse>,
+            tonic::Status,
+        >;
         /// Get the list of currently online peers.
         async fn get_online_peers(
             &self,
@@ -271,6 +369,14 @@ pub mod directory_of_service_server {
             request: tonic::Request<super::GetPendingRequestsRequest>,
         ) -> std::result::Result<
             tonic::Response<super::GetPendingRequestsResponse>,
+            tonic::Status,
+        >;
+        /// Add a new pending request to the directory.
+        async fn add_pending_request(
+            &self,
+            request: tonic::Request<super::AddPendingRequestRequest>,
+        ) -> std::result::Result<
+            tonic::Response<super::AddPendingRequestResponse>,
             tonic::Status,
         >;
     }
@@ -351,6 +457,51 @@ pub mod directory_of_service_server {
         }
         fn call(&mut self, req: http::Request<B>) -> Self::Future {
             match req.uri().path() {
+                "/directoryofservice.DirectoryOfService/Heartbeat" => {
+                    #[allow(non_camel_case_types)]
+                    struct HeartbeatSvc<T: DirectoryOfService>(pub Arc<T>);
+                    impl<
+                        T: DirectoryOfService,
+                    > tonic::server::UnaryService<super::HeartbeatRequest>
+                    for HeartbeatSvc<T> {
+                        type Response = super::HeartbeatResponse;
+                        type Future = BoxFuture<
+                            tonic::Response<Self::Response>,
+                            tonic::Status,
+                        >;
+                        fn call(
+                            &mut self,
+                            request: tonic::Request<super::HeartbeatRequest>,
+                        ) -> Self::Future {
+                            let inner = Arc::clone(&self.0);
+                            let fut = async move {
+                                <T as DirectoryOfService>::heartbeat(&inner, request).await
+                            };
+                            Box::pin(fut)
+                        }
+                    }
+                    let accept_compression_encodings = self.accept_compression_encodings;
+                    let send_compression_encodings = self.send_compression_encodings;
+                    let max_decoding_message_size = self.max_decoding_message_size;
+                    let max_encoding_message_size = self.max_encoding_message_size;
+                    let inner = self.inner.clone();
+                    let fut = async move {
+                        let method = HeartbeatSvc(inner);
+                        let codec = tonic_prost::ProstCodec::default();
+                        let mut grpc = tonic::server::Grpc::new(codec)
+                            .apply_compression_config(
+                                accept_compression_encodings,
+                                send_compression_encodings,
+                            )
+                            .apply_max_message_size_config(
+                                max_decoding_message_size,
+                                max_encoding_message_size,
+                            );
+                        let res = grpc.unary(method, req).await;
+                        Ok(res)
+                    };
+                    Box::pin(fut)
+                }
                 "/directoryofservice.DirectoryOfService/GetOnlinePeers" => {
                     #[allow(non_camel_case_types)]
                     struct GetOnlinePeersSvc<T: DirectoryOfService>(pub Arc<T>);
@@ -431,6 +582,55 @@ pub mod directory_of_service_server {
                     let inner = self.inner.clone();
                     let fut = async move {
                         let method = GetPendingRequestsSvc(inner);
+                        let codec = tonic_prost::ProstCodec::default();
+                        let mut grpc = tonic::server::Grpc::new(codec)
+                            .apply_compression_config(
+                                accept_compression_encodings,
+                                send_compression_encodings,
+                            )
+                            .apply_max_message_size_config(
+                                max_decoding_message_size,
+                                max_encoding_message_size,
+                            );
+                        let res = grpc.unary(method, req).await;
+                        Ok(res)
+                    };
+                    Box::pin(fut)
+                }
+                "/directoryofservice.DirectoryOfService/AddPendingRequest" => {
+                    #[allow(non_camel_case_types)]
+                    struct AddPendingRequestSvc<T: DirectoryOfService>(pub Arc<T>);
+                    impl<
+                        T: DirectoryOfService,
+                    > tonic::server::UnaryService<super::AddPendingRequestRequest>
+                    for AddPendingRequestSvc<T> {
+                        type Response = super::AddPendingRequestResponse;
+                        type Future = BoxFuture<
+                            tonic::Response<Self::Response>,
+                            tonic::Status,
+                        >;
+                        fn call(
+                            &mut self,
+                            request: tonic::Request<super::AddPendingRequestRequest>,
+                        ) -> Self::Future {
+                            let inner = Arc::clone(&self.0);
+                            let fut = async move {
+                                <T as DirectoryOfService>::add_pending_request(
+                                        &inner,
+                                        request,
+                                    )
+                                    .await
+                            };
+                            Box::pin(fut)
+                        }
+                    }
+                    let accept_compression_encodings = self.accept_compression_encodings;
+                    let send_compression_encodings = self.send_compression_encodings;
+                    let max_decoding_message_size = self.max_decoding_message_size;
+                    let max_encoding_message_size = self.max_encoding_message_size;
+                    let inner = self.inner.clone();
+                    let fut = async move {
+                        let method = AddPendingRequestSvc(inner);
                         let codec = tonic_prost::ProstCodec::default();
                         let mut grpc = tonic::server::Grpc::new(codec)
                             .apply_compression_config(

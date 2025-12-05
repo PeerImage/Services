@@ -61,6 +61,17 @@ message GetPendingRequestsResponse {
   repeated Request requests = 1;
 }
 
+// Request message for adding a pending request.
+message AddPendingRequestRequest {
+  Request request = 1;
+}
+
+// Response for adding a pending request.
+message AddPendingRequestResponse {
+  bool success = 1;     // Whether the request was successfully added
+  string message = 2;   // Optional message (e.g., error description)
+}
+
 // DirectoryOfService provides methods to query the directory for peers and requests.
 service DirectoryOfService {
   // Send a heartbeat to indicate the client is still online.
@@ -71,4 +82,7 @@ service DirectoryOfService {
   
   // Get the list of pending requests from the directory.
   rpc GetPendingRequests(GetPendingRequestsRequest) returns (GetPendingRequestsResponse);
+  
+  // Add a new pending request to the directory.
+  rpc AddPendingRequest(AddPendingRequestRequest) returns (AddPendingRequestResponse);
 }

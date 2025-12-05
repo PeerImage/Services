@@ -25,10 +25,9 @@ message Request {
   repeated string image_id = 4;
   // Optional: View counts corresponding to each image_id.
   // Must match the size of image_id list. Each index corresponds to the view count for that image.
-  repeated int32 number_of_views = 7;
-  // Optional: Updated view count.
-  // Only used for VIEWS_COUNT_EDIT_REQUEST.
-  optional int32 updated_view_count = 5;
+  // For VIEWS_COUNT_EDIT_REQUEST: contains a single element (the updated view count).
+  // For IMAGE_REQUEST: contains view counts for all requested images.
+  repeated int32 updated_view_count = 5;
   int64 timestamp = 6; // Unix timestamp (ms or seconds) when the request was created
 }
 

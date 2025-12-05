@@ -27,12 +27,10 @@ pub struct Request {
     pub image_id: ::prost::alloc::vec::Vec<::prost::alloc::string::String>,
     /// Optional: View counts corresponding to each image_id.
     /// Must match the size of image_id list. Each index corresponds to the view count for that image.
-    #[prost(int32, repeated, tag = "7")]
-    pub number_of_views: ::prost::alloc::vec::Vec<i32>,
-    /// Optional: Updated view count.
-    /// Only used for VIEWS_COUNT_EDIT_REQUEST.
-    #[prost(int32, optional, tag = "5")]
-    pub updated_view_count: ::core::option::Option<i32>,
+    /// For VIEWS_COUNT_EDIT_REQUEST: contains a single element (the updated view count).
+    /// For IMAGE_REQUEST: contains view counts for all requested images.
+    #[prost(int32, repeated, tag = "5")]
+    pub updated_view_count: ::prost::alloc::vec::Vec<i32>,
     /// Unix timestamp (ms or seconds) when the request was created
     #[prost(int64, tag = "6")]
     pub timestamp: i64,

@@ -1,5 +1,4 @@
 syntax = "proto3";
-
 package directoryofservice;
 
 // Peer represents an online peer in the directory.
@@ -21,16 +20,24 @@ message Request {
   string from_username = 1;     // Username of the requester
   string to_username = 2;       // Username of the recipient
   RequestType request_type = 3; // Type of the request
-
   // Optional: Image IDs involved in the request.
   // Used for IMAGE_REQUEST, VIEWS_COUNT_EDIT_REQUEST, and USERS_PERMISSION_REQUEST.
   repeated string image_id = 4;
-
   // Optional: Updated view count.
   // Only used for VIEWS_COUNT_EDIT_REQUEST.
   optional int32 updated_view_count = 5;
-
   int64 timestamp = 6; // Unix timestamp (ms or seconds) when the request was created
+}
+
+// Request message for client heartbeat.
+message HeartbeatRequest {
+  string ip = 1;        // IP address of the client
+  string username = 2;  // Username of the client
+}
+
+// Response for heartbeat confirmation.
+message HeartbeatResponse {
+  bool success = 1;     // Whether the heartbeat was successfully recorded
 }
 
 // Request message for getting online peers (can be empty or contain filters).
@@ -56,9 +63,12 @@ message GetPendingRequestsResponse {
 
 // DirectoryOfService provides methods to query the directory for peers and requests.
 service DirectoryOfService {
+  // Send a heartbeat to indicate the client is still online.
+  rpc Heartbeat(HeartbeatRequest) returns (HeartbeatResponse);
+  
   // Get the list of currently online peers.
   rpc GetOnlinePeers(GetOnlinePeersRequest) returns (GetOnlinePeersResponse);
-
+  
   // Get the list of pending requests from the directory.
   rpc GetPendingRequests(GetPendingRequestsRequest) returns (GetPendingRequestsResponse);
 }

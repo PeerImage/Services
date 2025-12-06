@@ -86,6 +86,39 @@ message AddPendingRequestResponse {
   string message = 2;   // Optional message (e.g., error description)
 }
 
+// Request message for accepting a friend request.
+message AcceptFriendRequestRequest {
+  string from_username = 1;  // Username who sent the friend request
+  string to_username = 2;    // Username who is accepting (current user)
+}
+
+// Response for accepting a friend request.
+message AcceptFriendRequestResponse {
+  bool success = 1;
+  string message = 2;
+}
+
+// Request message for getting friends list.
+message GetFriendsRequest {
+  string username = 1;  // Username to get friends for
+}
+
+// Response containing the list of friends.
+message GetFriendsResponse {
+  repeated string friends = 1;  // List of friend usernames
+}
+
+// Request message for checking friendship status.
+message CheckFriendshipRequest {
+  string user1 = 1;
+  string user2 = 2;
+}
+
+// Response for friendship status check.
+message CheckFriendshipResponse {
+  bool are_friends = 1;
+}
+
 // DirectoryOfService provides methods to query the directory for peers and requests.
 service DirectoryOfService {
   // Register a peer with the directory service.
@@ -102,4 +135,13 @@ service DirectoryOfService {
   
   // Add a new pending request to the directory.
   rpc AddPendingRequest(AddPendingRequestRequest) returns (AddPendingRequestResponse);
+  
+  // Accept a friend request and create a friendship.
+  rpc AcceptFriendRequest(AcceptFriendRequestRequest) returns (AcceptFriendRequestResponse);
+  
+  // Get the list of friends for a user.
+  rpc GetFriends(GetFriendsRequest) returns (GetFriendsResponse);
+  
+  // Check if two users are friends.
+  rpc CheckFriendship(CheckFriendshipRequest) returns (CheckFriendshipResponse);
 }

@@ -8,22 +8,15 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
 		std::process::exit(1);
 	}
 
-	// If the PROTOC env var is set, prost/tonic will use that. Otherwise ensure `protoc` is on PATH.
+	// Use vendored protoc if PROTOC env var is not set
 	if std::env::var_os("PROTOC").is_none() {
-		match std::process::Command::new("protoc").arg("--version").output() {
-			Ok(output) if output.status.success() => {
-				// protoc present, continue
-			}
-			_ => {
-				eprintln!(
-					"protoc was not found. Install the protobuf compiler or set the PROTOC env var.\n\
-					- On Debian/Ubuntu: sudo apt-get install protobuf-compiler\n\
-					- Or add a vendored protoc build-dependency (e.g. protoc-bin-vendored) and set PROTOC\n\
-					See: https://docs.rs/prost-build/#sourcing-protoc"
-				);
-				std::process::exit(1);
-			}
+		let protoc_path = protoc_bin_vendored::protoc_bin_path()
+			.map_err(|e| format!("Failed to get vendored protoc path: {}", e))?;
+		// Safety: This is safe in build.rs as it runs in a single-threaded context before main compilation
+		unsafe {
+			std::env::set_var("PROTOC", &protoc_path);
 		}
+		println!("cargo:warning=Using vendored protoc from: {:?}", protoc_path);
 	}
 
 	// compile your proto(s)

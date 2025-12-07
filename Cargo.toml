@@ -12,4 +12,4 @@ async-trait = "0.1"
 
 [build-dependencies]
 tonic-prost-build = "0.14"
-protoc-bin-vendored = "3.0"
+protoc-bin-vendored = "3.2"

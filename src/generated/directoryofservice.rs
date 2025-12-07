@@ -158,6 +158,172 @@ pub struct CheckFriendshipResponse {
     #[prost(bool, tag = "1")]
     pub are_friends: bool,
 }
+/// Message representing shared access for an image
+#[derive(Clone, PartialEq, Eq, Hash, ::prost::Message)]
+pub struct SharedAccess {
+    #[prost(string, tag = "1")]
+    pub username: ::prost::alloc::string::String,
+    #[prost(int32, tag = "2")]
+    pub views_allowed: i32,
+    #[prost(int32, tag = "3")]
+    pub views_used: i32,
+}
+/// Message representing stored image metadata
+#[derive(Clone, PartialEq, ::prost::Message)]
+pub struct ImageMetadata {
+    #[prost(string, tag = "1")]
+    pub image_id: ::prost::alloc::string::String,
+    /// Owner username
+    #[prost(string, tag = "2")]
+    pub username: ::prost::alloc::string::String,
+    #[prost(string, tag = "3")]
+    pub filename: ::prost::alloc::string::String,
+    #[prost(uint64, tag = "4")]
+    pub size: u64,
+    /// Unix timestamp in milliseconds
+    #[prost(int64, tag = "5")]
+    pub uploaded_at: i64,
+    #[prost(bool, tag = "6")]
+    pub encrypted: bool,
+    /// base64 encoded
+    #[prost(string, tag = "7")]
+    pub image_data: ::prost::alloc::string::String,
+    /// base64 encoded encrypted version
+    #[prost(string, optional, tag = "8")]
+    pub encrypted_data: ::core::option::Option<::prost::alloc::string::String>,
+    #[prost(string, optional, tag = "9")]
+    pub thumbnail_base64: ::core::option::Option<::prost::alloc::string::String>,
+    #[prost(message, repeated, tag = "10")]
+    pub shared_with: ::prost::alloc::vec::Vec<SharedAccess>,
+}
+/// Request to save an image to the server
+#[derive(Clone, PartialEq, ::prost::Message)]
+pub struct SaveImageRequest {
+    #[prost(message, optional, tag = "1")]
+    pub image: ::core::option::Option<ImageMetadata>,
+}
+/// Response for saving an image
+#[derive(Clone, PartialEq, Eq, Hash, ::prost::Message)]
+pub struct SaveImageResponse {
+    #[prost(bool, tag = "1")]
+    pub success: bool,
+    #[prost(string, tag = "2")]
+    pub message: ::prost::alloc::string::String,
+    #[prost(string, tag = "3")]
+    pub image_id: ::prost::alloc::string::String,
+}
+/// Request to get images owned by a user
+#[derive(Clone, PartialEq, Eq, Hash, ::prost::Message)]
+pub struct GetUserImagesRequest {
+    #[prost(string, tag = "1")]
+    pub username: ::prost::alloc::string::String,
+}
+/// Response containing user's images
+#[derive(Clone, PartialEq, ::prost::Message)]
+pub struct GetUserImagesResponse {
+    #[prost(message, repeated, tag = "1")]
+    pub images: ::prost::alloc::vec::Vec<ImageMetadata>,
+}
+/// Request to get images shared with a user
+#[derive(Clone, PartialEq, Eq, Hash, ::prost::Message)]
+pub struct GetSharedImagesRequest {
+    #[prost(string, tag = "1")]
+    pub username: ::prost::alloc::string::String,
+}
+/// Response containing shared images
+#[derive(Clone, PartialEq, ::prost::Message)]
+pub struct GetSharedImagesResponse {
+    #[prost(message, repeated, tag = "1")]
+    pub images: ::prost::alloc::vec::Vec<ImageMetadata>,
+}
+/// Request to update shared access for an image
+#[derive(Clone, PartialEq, Eq, Hash, ::prost::Message)]
+pub struct UpdateSharedAccessRequest {
+    #[prost(string, tag = "1")]
+    pub image_id: ::prost::alloc::string::String,
+    #[prost(string, tag = "2")]
+    pub owner_username: ::prost::alloc::string::String,
+    #[prost(string, tag = "3")]
+    pub shared_username: ::prost::alloc::string::String,
+    #[prost(int32, tag = "4")]
+    pub views_allowed: i32,
+}
+/// Response for updating shared access
+#[derive(Clone, PartialEq, Eq, Hash, ::prost::Message)]
+pub struct UpdateSharedAccessResponse {
+    #[prost(bool, tag = "1")]
+    pub success: bool,
+    #[prost(string, tag = "2")]
+    pub message: ::prost::alloc::string::String,
+}
+/// Request to remove shared access
+#[derive(Clone, PartialEq, Eq, Hash, ::prost::Message)]
+pub struct RemoveSharedAccessRequest {
+    #[prost(string, tag = "1")]
+    pub image_id: ::prost::alloc::string::String,
+    #[prost(string, tag = "2")]
+    pub owner_username: ::prost::alloc::string::String,
+    #[prost(string, tag = "3")]
+    pub shared_username: ::prost::alloc::string::String,
+}
+/// Response for removing shared access
+#[derive(Clone, PartialEq, Eq, Hash, ::prost::Message)]
+pub struct RemoveSharedAccessResponse {
+    #[prost(bool, tag = "1")]
+    pub success: bool,
+    #[prost(string, tag = "2")]
+    pub message: ::prost::alloc::string::String,
+}
+/// Request to increment view count
+#[derive(Clone, PartialEq, Eq, Hash, ::prost::Message)]
+pub struct IncrementViewCountRequest {
+    #[prost(string, tag = "1")]
+    pub image_id: ::prost::alloc::string::String,
+    #[prost(string, tag = "2")]
+    pub owner_username: ::prost::alloc::string::String,
+    #[prost(string, tag = "3")]
+    pub viewer_username: ::prost::alloc::string::String,
+}
+/// Response for incrementing view count
+#[derive(Clone, PartialEq, Eq, Hash, ::prost::Message)]
+pub struct IncrementViewCountResponse {
+    #[prost(bool, tag = "1")]
+    pub success: bool,
+    #[prost(string, tag = "2")]
+    pub message: ::prost::alloc::string::String,
+}
+/// Request to delete an image
+#[derive(Clone, PartialEq, Eq, Hash, ::prost::Message)]
+pub struct DeleteImageRequest {
+    #[prost(string, tag = "1")]
+    pub image_id: ::prost::alloc::string::String,
+    #[prost(string, tag = "2")]
+    pub username: ::prost::alloc::string::String,
+}
+/// Response for deleting an image
+#[derive(Clone, PartialEq, Eq, Hash, ::prost::Message)]
+pub struct DeleteImageResponse {
+    #[prost(bool, tag = "1")]
+    pub success: bool,
+    #[prost(string, tag = "2")]
+    pub message: ::prost::alloc::string::String,
+}
+/// Request to get a specific image
+#[derive(Clone, PartialEq, Eq, Hash, ::prost::Message)]
+pub struct GetImageRequest {
+    #[prost(string, tag = "1")]
+    pub image_id: ::prost::alloc::string::String,
+    #[prost(string, tag = "2")]
+    pub owner_username: ::prost::alloc::string::String,
+}
+/// Response containing the image
+#[derive(Clone, PartialEq, ::prost::Message)]
+pub struct GetImageResponse {
+    #[prost(bool, tag = "1")]
+    pub success: bool,
+    #[prost(message, optional, tag = "2")]
+    pub image: ::core::option::Option<ImageMetadata>,
+}
 /// RequestType enumerates the different types of requests that can be pending.
 #[derive(Clone, Copy, Debug, PartialEq, Eq, Hash, PartialOrd, Ord, ::prost::Enumeration)]
 #[repr(i32)]
@@ -520,6 +686,240 @@ pub mod directory_of_service_client {
                 );
             self.inner.unary(req, path, codec).await
         }
+        /// Save an image to the server
+        pub async fn save_image(
+            &mut self,
+            request: impl tonic::IntoRequest<super::SaveImageRequest>,
+        ) -> std::result::Result<
+            tonic::Response<super::SaveImageResponse>,
+            tonic::Status,
+        > {
+            self.inner
+                .ready()
+                .await
+                .map_err(|e| {
+                    tonic::Status::unknown(
+                        format!("Service was not ready: {}", e.into()),
+                    )
+                })?;
+            let codec = tonic_prost::ProstCodec::default();
+            let path = http::uri::PathAndQuery::from_static(
+                "/directoryofservice.DirectoryOfService/SaveImage",
+            );
+            let mut req = request.into_request();
+            req.extensions_mut()
+                .insert(
+                    GrpcMethod::new("directoryofservice.DirectoryOfService", "SaveImage"),
+                );
+            self.inner.unary(req, path, codec).await
+        }
+        /// Get all images owned by a user
+        pub async fn get_user_images(
+            &mut self,
+            request: impl tonic::IntoRequest<super::GetUserImagesRequest>,
+        ) -> std::result::Result<
+            tonic::Response<super::GetUserImagesResponse>,
+            tonic::Status,
+        > {
+            self.inner
+                .ready()
+                .await
+                .map_err(|e| {
+                    tonic::Status::unknown(
+                        format!("Service was not ready: {}", e.into()),
+                    )
+                })?;
+            let codec = tonic_prost::ProstCodec::default();
+            let path = http::uri::PathAndQuery::from_static(
+                "/directoryofservice.DirectoryOfService/GetUserImages",
+            );
+            let mut req = request.into_request();
+            req.extensions_mut()
+                .insert(
+                    GrpcMethod::new(
+                        "directoryofservice.DirectoryOfService",
+                        "GetUserImages",
+                    ),
+                );
+            self.inner.unary(req, path, codec).await
+        }
+        /// Get all images shared with a user
+        pub async fn get_shared_images(
+            &mut self,
+            request: impl tonic::IntoRequest<super::GetSharedImagesRequest>,
+        ) -> std::result::Result<
+            tonic::Response<super::GetSharedImagesResponse>,
+            tonic::Status,
+        > {
+            self.inner
+                .ready()
+                .await
+                .map_err(|e| {
+                    tonic::Status::unknown(
+                        format!("Service was not ready: {}", e.into()),
+                    )
+                })?;
+            let codec = tonic_prost::ProstCodec::default();
+            let path = http::uri::PathAndQuery::from_static(
+                "/directoryofservice.DirectoryOfService/GetSharedImages",
+            );
+            let mut req = request.into_request();
+            req.extensions_mut()
+                .insert(
+                    GrpcMethod::new(
+                        "directoryofservice.DirectoryOfService",
+                        "GetSharedImages",
+                    ),
+                );
+            self.inner.unary(req, path, codec).await
+        }
+        /// Update shared access for an image
+        pub async fn update_shared_access(
+            &mut self,
+            request: impl tonic::IntoRequest<super::UpdateSharedAccessRequest>,
+        ) -> std::result::Result<
+            tonic::Response<super::UpdateSharedAccessResponse>,
+            tonic::Status,
+        > {
+            self.inner
+                .ready()
+                .await
+                .map_err(|e| {
+                    tonic::Status::unknown(
+                        format!("Service was not ready: {}", e.into()),
+                    )
+                })?;
+            let codec = tonic_prost::ProstCodec::default();
+            let path = http::uri::PathAndQuery::from_static(
+                "/directoryofservice.DirectoryOfService/UpdateSharedAccess",
+            );
+            let mut req = request.into_request();
+            req.extensions_mut()
+                .insert(
+                    GrpcMethod::new(
+                        "directoryofservice.DirectoryOfService",
+                        "UpdateSharedAccess",
+                    ),
+                );
+            self.inner.unary(req, path, codec).await
+        }
+        /// Remove shared access for an image
+        pub async fn remove_shared_access(
+            &mut self,
+            request: impl tonic::IntoRequest<super::RemoveSharedAccessRequest>,
+        ) -> std::result::Result<
+            tonic::Response<super::RemoveSharedAccessResponse>,
+            tonic::Status,
+        > {
+            self.inner
+                .ready()
+                .await
+                .map_err(|e| {
+                    tonic::Status::unknown(
+                        format!("Service was not ready: {}", e.into()),
+                    )
+                })?;
+            let codec = tonic_prost::ProstCodec::default();
+            let path = http::uri::PathAndQuery::from_static(
+                "/directoryofservice.DirectoryOfService/RemoveSharedAccess",
+            );
+            let mut req = request.into_request();
+            req.extensions_mut()
+                .insert(
+                    GrpcMethod::new(
+                        "directoryofservice.DirectoryOfService",
+                        "RemoveSharedAccess",
+                    ),
+                );
+            self.inner.unary(req, path, codec).await
+        }
+        /// Increment view count for an image
+        pub async fn increment_view_count(
+            &mut self,
+            request: impl tonic::IntoRequest<super::IncrementViewCountRequest>,
+        ) -> std::result::Result<
+            tonic::Response<super::IncrementViewCountResponse>,
+            tonic::Status,
+        > {
+            self.inner
+                .ready()
+                .await
+                .map_err(|e| {
+                    tonic::Status::unknown(
+                        format!("Service was not ready: {}", e.into()),
+                    )
+                })?;
+            let codec = tonic_prost::ProstCodec::default();
+            let path = http::uri::PathAndQuery::from_static(
+                "/directoryofservice.DirectoryOfService/IncrementViewCount",
+            );
+            let mut req = request.into_request();
+            req.extensions_mut()
+                .insert(
+                    GrpcMethod::new(
+                        "directoryofservice.DirectoryOfService",
+                        "IncrementViewCount",
+                    ),
+                );
+            self.inner.unary(req, path, codec).await
+        }
+        /// Delete an image
+        pub async fn delete_image(
+            &mut self,
+            request: impl tonic::IntoRequest<super::DeleteImageRequest>,
+        ) -> std::result::Result<
+            tonic::Response<super::DeleteImageResponse>,
+            tonic::Status,
+        > {
+            self.inner
+                .ready()
+                .await
+                .map_err(|e| {
+                    tonic::Status::unknown(
+                        format!("Service was not ready: {}", e.into()),
+                    )
+                })?;
+            let codec = tonic_prost::ProstCodec::default();
+            let path = http::uri::PathAndQuery::from_static(
+                "/directoryofservice.DirectoryOfService/DeleteImage",
+            );
+            let mut req = request.into_request();
+            req.extensions_mut()
+                .insert(
+                    GrpcMethod::new(
+                        "directoryofservice.DirectoryOfService",
+                        "DeleteImage",
+                    ),
+                );
+            self.inner.unary(req, path, codec).await
+        }
+        /// Get a specific image
+        pub async fn get_image(
+            &mut self,
+            request: impl tonic::IntoRequest<super::GetImageRequest>,
+        ) -> std::result::Result<
+            tonic::Response<super::GetImageResponse>,
+            tonic::Status,
+        > {
+            self.inner
+                .ready()
+                .await
+                .map_err(|e| {
+                    tonic::Status::unknown(
+                        format!("Service was not ready: {}", e.into()),
+                    )
+                })?;
+            let codec = tonic_prost::ProstCodec::default();
+            let path = http::uri::PathAndQuery::from_static(
+                "/directoryofservice.DirectoryOfService/GetImage",
+            );
+            let mut req = request.into_request();
+            req.extensions_mut()
+                .insert(
+                    GrpcMethod::new("directoryofservice.DirectoryOfService", "GetImage"),
+                );
+            self.inner.unary(req, path, codec).await
+        }
     }
 }
 /// Generated server implementations.
@@ -597,6 +997,70 @@ pub mod directory_of_service_server {
             request: tonic::Request<super::CheckFriendshipRequest>,
         ) -> std::result::Result<
             tonic::Response<super::CheckFriendshipResponse>,
+            tonic::Status,
+        >;
+        /// Save an image to the server
+        async fn save_image(
+            &self,
+            request: tonic::Request<super::SaveImageRequest>,
+        ) -> std::result::Result<
+            tonic::Response<super::SaveImageResponse>,
+            tonic::Status,
+        >;
+        /// Get all images owned by a user
+        async fn get_user_images(
+            &self,
+            request: tonic::Request<super::GetUserImagesRequest>,
+        ) -> std::result::Result<
+            tonic::Response<super::GetUserImagesResponse>,
+            tonic::Status,
+        >;
+        /// Get all images shared with a user
+        async fn get_shared_images(
+            &self,
+            request: tonic::Request<super::GetSharedImagesRequest>,
+        ) -> std::result::Result<
+            tonic::Response<super::GetSharedImagesResponse>,
+            tonic::Status,
+        >;
+        /// Update shared access for an image
+        async fn update_shared_access(
+            &self,
+            request: tonic::Request<super::UpdateSharedAccessRequest>,
+        ) -> std::result::Result<
+            tonic::Response<super::UpdateSharedAccessResponse>,
+            tonic::Status,
+        >;
+        /// Remove shared access for an image
+        async fn remove_shared_access(
+            &self,
+            request: tonic::Request<super::RemoveSharedAccessRequest>,
+        ) -> std::result::Result<
+            tonic::Response<super::RemoveSharedAccessResponse>,
+            tonic::Status,
+        >;
+        /// Increment view count for an image
+        async fn increment_view_count(
+            &self,
+            request: tonic::Request<super::IncrementViewCountRequest>,
+        ) -> std::result::Result<
+            tonic::Response<super::IncrementViewCountResponse>,
+            tonic::Status,
+        >;
+        /// Delete an image
+        async fn delete_image(
+            &self,
+            request: tonic::Request<super::DeleteImageRequest>,
+        ) -> std::result::Result<
+            tonic::Response<super::DeleteImageResponse>,
+            tonic::Status,
+        >;
+        /// Get a specific image
+        async fn get_image(
+            &self,
+            request: tonic::Request<super::GetImageRequest>,
+        ) -> std::result::Result<
+            tonic::Response<super::GetImageResponse>,
             tonic::Status,
         >;
     }
@@ -1038,6 +1502,384 @@ pub mod directory_of_service_server {
                     let inner = self.inner.clone();
                     let fut = async move {
                         let method = CheckFriendshipSvc(inner);
+                        let codec = tonic_prost::ProstCodec::default();
+                        let mut grpc = tonic::server::Grpc::new(codec)
+                            .apply_compression_config(
+                                accept_compression_encodings,
+                                send_compression_encodings,
+                            )
+                            .apply_max_message_size_config(
+                                max_decoding_message_size,
+                                max_encoding_message_size,
+                            );
+                        let res = grpc.unary(method, req).await;
+                        Ok(res)
+                    };
+                    Box::pin(fut)
+                }
+                "/directoryofservice.DirectoryOfService/SaveImage" => {
+                    #[allow(non_camel_case_types)]
+                    struct SaveImageSvc<T: DirectoryOfService>(pub Arc<T>);
+                    impl<
+                        T: DirectoryOfService,
+                    > tonic::server::UnaryService<super::SaveImageRequest>
+                    for SaveImageSvc<T> {
+                        type Response = super::SaveImageResponse;
+                        type Future = BoxFuture<
+                            tonic::Response<Self::Response>,
+                            tonic::Status,
+                        >;
+                        fn call(
+                            &mut self,
+                            request: tonic::Request<super::SaveImageRequest>,
+                        ) -> Self::Future {
+                            let inner = Arc::clone(&self.0);
+                            let fut = async move {
+                                <T as DirectoryOfService>::save_image(&inner, request).await
+                            };
+                            Box::pin(fut)
+                        }
+                    }
+                    let accept_compression_encodings = self.accept_compression_encodings;
+                    let send_compression_encodings = self.send_compression_encodings;
+                    let max_decoding_message_size = self.max_decoding_message_size;
+                    let max_encoding_message_size = self.max_encoding_message_size;
+                    let inner = self.inner.clone();
+                    let fut = async move {
+                        let method = SaveImageSvc(inner);
+                        let codec = tonic_prost::ProstCodec::default();
+                        let mut grpc = tonic::server::Grpc::new(codec)
+                            .apply_compression_config(
+                                accept_compression_encodings,
+                                send_compression_encodings,
+                            )
+                            .apply_max_message_size_config(
+                                max_decoding_message_size,
+                                max_encoding_message_size,
+                            );
+                        let res = grpc.unary(method, req).await;
+                        Ok(res)
+                    };
+                    Box::pin(fut)
+                }
+                "/directoryofservice.DirectoryOfService/GetUserImages" => {
+                    #[allow(non_camel_case_types)]
+                    struct GetUserImagesSvc<T: DirectoryOfService>(pub Arc<T>);
+                    impl<
+                        T: DirectoryOfService,
+                    > tonic::server::UnaryService<super::GetUserImagesRequest>
+                    for GetUserImagesSvc<T> {
+                        type Response = super::GetUserImagesResponse;
+                        type Future = BoxFuture<
+                            tonic::Response<Self::Response>,
+                            tonic::Status,
+                        >;
+                        fn call(
+                            &mut self,
+                            request: tonic::Request<super::GetUserImagesRequest>,
+                        ) -> Self::Future {
+                            let inner = Arc::clone(&self.0);
+                            let fut = async move {
+                                <T as DirectoryOfService>::get_user_images(&inner, request)
+                                    .await
+                            };
+                            Box::pin(fut)
+                        }
+                    }
+                    let accept_compression_encodings = self.accept_compression_encodings;
+                    let send_compression_encodings = self.send_compression_encodings;
+                    let max_decoding_message_size = self.max_decoding_message_size;
+                    let max_encoding_message_size = self.max_encoding_message_size;
+                    let inner = self.inner.clone();
+                    let fut = async move {
+                        let method = GetUserImagesSvc(inner);
+                        let codec = tonic_prost::ProstCodec::default();
+                        let mut grpc = tonic::server::Grpc::new(codec)
+                            .apply_compression_config(
+                                accept_compression_encodings,
+                                send_compression_encodings,
+                            )
+                            .apply_max_message_size_config(
+                                max_decoding_message_size,
+                                max_encoding_message_size,
+                            );
+                        let res = grpc.unary(method, req).await;
+                        Ok(res)
+                    };
+                    Box::pin(fut)
+                }
+                "/directoryofservice.DirectoryOfService/GetSharedImages" => {
+                    #[allow(non_camel_case_types)]
+                    struct GetSharedImagesSvc<T: DirectoryOfService>(pub Arc<T>);
+                    impl<
+                        T: DirectoryOfService,
+                    > tonic::server::UnaryService<super::GetSharedImagesRequest>
+                    for GetSharedImagesSvc<T> {
+                        type Response = super::GetSharedImagesResponse;
+                        type Future = BoxFuture<
+                            tonic::Response<Self::Response>,
+                            tonic::Status,
+                        >;
+                        fn call(
+                            &mut self,
+                            request: tonic::Request<super::GetSharedImagesRequest>,
+                        ) -> Self::Future {
+                            let inner = Arc::clone(&self.0);
+                            let fut = async move {
+                                <T as DirectoryOfService>::get_shared_images(
+                                        &inner,
+                                        request,
+                                    )
+                                    .await
+                            };
+                            Box::pin(fut)
+                        }
+                    }
+                    let accept_compression_encodings = self.accept_compression_encodings;
+                    let send_compression_encodings = self.send_compression_encodings;
+                    let max_decoding_message_size = self.max_decoding_message_size;
+                    let max_encoding_message_size = self.max_encoding_message_size;
+                    let inner = self.inner.clone();
+                    let fut = async move {
+                        let method = GetSharedImagesSvc(inner);
+                        let codec = tonic_prost::ProstCodec::default();
+                        let mut grpc = tonic::server::Grpc::new(codec)
+                            .apply_compression_config(
+                                accept_compression_encodings,
+                                send_compression_encodings,
+                            )
+                            .apply_max_message_size_config(
+                                max_decoding_message_size,
+                                max_encoding_message_size,
+                            );
+                        let res = grpc.unary(method, req).await;
+                        Ok(res)
+                    };
+                    Box::pin(fut)
+                }
+                "/directoryofservice.DirectoryOfService/UpdateSharedAccess" => {
+                    #[allow(non_camel_case_types)]
+                    struct UpdateSharedAccessSvc<T: DirectoryOfService>(pub Arc<T>);
+                    impl<
+                        T: DirectoryOfService,
+                    > tonic::server::UnaryService<super::UpdateSharedAccessRequest>
+                    for UpdateSharedAccessSvc<T> {
+                        type Response = super::UpdateSharedAccessResponse;
+                        type Future = BoxFuture<
+                            tonic::Response<Self::Response>,
+                            tonic::Status,
+                        >;
+                        fn call(
+                            &mut self,
+                            request: tonic::Request<super::UpdateSharedAccessRequest>,
+                        ) -> Self::Future {
+                            let inner = Arc::clone(&self.0);
+                            let fut = async move {
+                                <T as DirectoryOfService>::update_shared_access(
+                                        &inner,
+                                        request,
+                                    )
+                                    .await
+                            };
+                            Box::pin(fut)
+                        }
+                    }
+                    let accept_compression_encodings = self.accept_compression_encodings;
+                    let send_compression_encodings = self.send_compression_encodings;
+                    let max_decoding_message_size = self.max_decoding_message_size;
+                    let max_encoding_message_size = self.max_encoding_message_size;
+                    let inner = self.inner.clone();
+                    let fut = async move {
+                        let method = UpdateSharedAccessSvc(inner);
+                        let codec = tonic_prost::ProstCodec::default();
+                        let mut grpc = tonic::server::Grpc::new(codec)
+                            .apply_compression_config(
+                                accept_compression_encodings,
+                                send_compression_encodings,
+                            )
+                            .apply_max_message_size_config(
+                                max_decoding_message_size,
+                                max_encoding_message_size,
+                            );
+                        let res = grpc.unary(method, req).await;
+                        Ok(res)
+                    };
+                    Box::pin(fut)
+                }
+                "/directoryofservice.DirectoryOfService/RemoveSharedAccess" => {
+                    #[allow(non_camel_case_types)]
+                    struct RemoveSharedAccessSvc<T: DirectoryOfService>(pub Arc<T>);
+                    impl<
+                        T: DirectoryOfService,
+                    > tonic::server::UnaryService<super::RemoveSharedAccessRequest>
+                    for RemoveSharedAccessSvc<T> {
+                        type Response = super::RemoveSharedAccessResponse;
+                        type Future = BoxFuture<
+                            tonic::Response<Self::Response>,
+                            tonic::Status,
+                        >;
+                        fn call(
+                            &mut self,
+                            request: tonic::Request<super::RemoveSharedAccessRequest>,
+                        ) -> Self::Future {
+                            let inner = Arc::clone(&self.0);
+                            let fut = async move {
+                                <T as DirectoryOfService>::remove_shared_access(
+                                        &inner,
+                                        request,
+                                    )
+                                    .await
+                            };
+                            Box::pin(fut)
+                        }
+                    }
+                    let accept_compression_encodings = self.accept_compression_encodings;
+                    let send_compression_encodings = self.send_compression_encodings;
+                    let max_decoding_message_size = self.max_decoding_message_size;
+                    let max_encoding_message_size = self.max_encoding_message_size;
+                    let inner = self.inner.clone();
+                    let fut = async move {
+                        let method = RemoveSharedAccessSvc(inner);
+                        let codec = tonic_prost::ProstCodec::default();
+                        let mut grpc = tonic::server::Grpc::new(codec)
+                            .apply_compression_config(
+                                accept_compression_encodings,
+                                send_compression_encodings,
+                            )
+                            .apply_max_message_size_config(
+                                max_decoding_message_size,
+                                max_encoding_message_size,
+                            );
+                        let res = grpc.unary(method, req).await;
+                        Ok(res)
+                    };
+                    Box::pin(fut)
+                }
+                "/directoryofservice.DirectoryOfService/IncrementViewCount" => {
+                    #[allow(non_camel_case_types)]
+                    struct IncrementViewCountSvc<T: DirectoryOfService>(pub Arc<T>);
+                    impl<
+                        T: DirectoryOfService,
+                    > tonic::server::UnaryService<super::IncrementViewCountRequest>
+                    for IncrementViewCountSvc<T> {
+                        type Response = super::IncrementViewCountResponse;
+                        type Future = BoxFuture<
+                            tonic::Response<Self::Response>,
+                            tonic::Status,
+                        >;
+                        fn call(
+                            &mut self,
+                            request: tonic::Request<super::IncrementViewCountRequest>,
+                        ) -> Self::Future {
+                            let inner = Arc::clone(&self.0);
+                            let fut = async move {
+                                <T as DirectoryOfService>::increment_view_count(
+                                        &inner,
+                                        request,
+                                    )
+                                    .await
+                            };
+                            Box::pin(fut)
+                        }
+                    }
+                    let accept_compression_encodings = self.accept_compression_encodings;
+                    let send_compression_encodings = self.send_compression_encodings;
+                    let max_decoding_message_size = self.max_decoding_message_size;
+                    let max_encoding_message_size = self.max_encoding_message_size;
+                    let inner = self.inner.clone();
+                    let fut = async move {
+                        let method = IncrementViewCountSvc(inner);
+                        let codec = tonic_prost::ProstCodec::default();
+                        let mut grpc = tonic::server::Grpc::new(codec)
+                            .apply_compression_config(
+                                accept_compression_encodings,
+                                send_compression_encodings,
+                            )
+                            .apply_max_message_size_config(
+                                max_decoding_message_size,
+                                max_encoding_message_size,
+                            );
+                        let res = grpc.unary(method, req).await;
+                        Ok(res)
+                    };
+                    Box::pin(fut)
+                }
+                "/directoryofservice.DirectoryOfService/DeleteImage" => {
+                    #[allow(non_camel_case_types)]
+                    struct DeleteImageSvc<T: DirectoryOfService>(pub Arc<T>);
+                    impl<
+                        T: DirectoryOfService,
+                    > tonic::server::UnaryService<super::DeleteImageRequest>
+                    for DeleteImageSvc<T> {
+                        type Response = super::DeleteImageResponse;
+                        type Future = BoxFuture<
+                            tonic::Response<Self::Response>,
+                            tonic::Status,
+                        >;
+                        fn call(
+                            &mut self,
+                            request: tonic::Request<super::DeleteImageRequest>,
+                        ) -> Self::Future {
+                            let inner = Arc::clone(&self.0);
+                            let fut = async move {
+                                <T as DirectoryOfService>::delete_image(&inner, request)
+                                    .await
+                            };
+                            Box::pin(fut)
+                        }
+                    }
+                    let accept_compression_encodings = self.accept_compression_encodings;
+                    let send_compression_encodings = self.send_compression_encodings;
+                    let max_decoding_message_size = self.max_decoding_message_size;
+                    let max_encoding_message_size = self.max_encoding_message_size;
+                    let inner = self.inner.clone();
+                    let fut = async move {
+                        let method = DeleteImageSvc(inner);
+                        let codec = tonic_prost::ProstCodec::default();
+                        let mut grpc = tonic::server::Grpc::new(codec)
+                            .apply_compression_config(
+                                accept_compression_encodings,
+                                send_compression_encodings,
+                            )
+                            .apply_max_message_size_config(
+                                max_decoding_message_size,
+                                max_encoding_message_size,
+                            );
+                        let res = grpc.unary(method, req).await;
+                        Ok(res)
+                    };
+                    Box::pin(fut)
+                }
+                "/directoryofservice.DirectoryOfService/GetImage" => {
+                    #[allow(non_camel_case_types)]
+                    struct GetImageSvc<T: DirectoryOfService>(pub Arc<T>);
+                    impl<
+                        T: DirectoryOfService,
+                    > tonic::server::UnaryService<super::GetImageRequest>
+                    for GetImageSvc<T> {
+                        type Response = super::GetImageResponse;
+                        type Future = BoxFuture<
+                            tonic::Response<Self::Response>,
+                            tonic::Status,
+                        >;
+                        fn call(
+                            &mut self,
+                            request: tonic::Request<super::GetImageRequest>,
+                        ) -> Self::Future {
+                            let inner = Arc::clone(&self.0);
+                            let fut = async move {
+                                <T as DirectoryOfService>::get_image(&inner, request).await
+                            };
+                            Box::pin(fut)
+                        }
+                    }
+                    let accept_compression_encodings = self.accept_compression_encodings;
+                    let send_compression_encodings = self.send_compression_encodings;
+                    let max_decoding_message_size = self.max_decoding_message_size;
+                    let max_encoding_message_size = self.max_encoding_message_size;
+                    let inner = self.inner.clone();
+                    let fut = async move {
+                        let method = GetImageSvc(inner);
                         let codec = tonic_prost::ProstCodec::default();
                         let mut grpc = tonic::server::Grpc::new(codec)
                             .apply_compression_config(

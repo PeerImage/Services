@@ -119,6 +119,125 @@ message CheckFriendshipResponse {
   bool are_friends = 1;
 }
 
+// ===== IMAGE STORAGE MESSAGES =====
+
+// Message representing shared access for an image
+message SharedAccess {
+  string username = 1;
+  int32 views_allowed = 2;
+  int32 views_used = 3;
+}
+
+// Message representing stored image metadata
+message ImageMetadata {
+  string image_id = 1;
+  string username = 2;  // Owner username
+  string filename = 3;
+  uint64 size = 4;
+  int64 uploaded_at = 5;  // Unix timestamp in milliseconds
+  bool encrypted = 6;
+  string image_data = 7;  // base64 encoded
+  optional string encrypted_data = 8;  // base64 encoded encrypted version
+  optional string thumbnail_base64 = 9;
+  repeated SharedAccess shared_with = 10;
+}
+
+// Request to save an image to the server
+message SaveImageRequest {
+  ImageMetadata image = 1;
+}
+
+// Response for saving an image
+message SaveImageResponse {
+  bool success = 1;
+  string message = 2;
+  string image_id = 3;
+}
+
+// Request to get images owned by a user
+message GetUserImagesRequest {
+  string username = 1;
+}
+
+// Response containing user's images
+message GetUserImagesResponse {
+  repeated ImageMetadata images = 1;
+}
+
+// Request to get images shared with a user
+message GetSharedImagesRequest {
+  string username = 1;
+}
+
+// Response containing shared images
+message GetSharedImagesResponse {
+  repeated ImageMetadata images = 1;
+}
+
+// Request to update shared access for an image
+message UpdateSharedAccessRequest {
+  string image_id = 1;
+  string owner_username = 2;
+  string shared_username = 3;
+  int32 views_allowed = 4;
+}
+
+// Response for updating shared access
+message UpdateSharedAccessResponse {
+  bool success = 1;
+  string message = 2;
+}
+
+// Request to remove shared access
+message RemoveSharedAccessRequest {
+  string image_id = 1;
+  string owner_username = 2;
+  string shared_username = 3;
+}
+
+// Response for removing shared access
+message RemoveSharedAccessResponse {
+  bool success = 1;
+  string message = 2;
+}
+
+// Request to increment view count
+message IncrementViewCountRequest {
+  string image_id = 1;
+  string owner_username = 2;
+  string viewer_username = 3;
+}
+
+// Response for incrementing view count
+message IncrementViewCountResponse {
+  bool success = 1;
+  string message = 2;
+}
+
+// Request to delete an image
+message DeleteImageRequest {
+  string image_id = 1;
+  string username = 2;
+}
+
+// Response for deleting an image
+message DeleteImageResponse {
+  bool success = 1;
+  string message = 2;
+}
+
+// Request to get a specific image
+message GetImageRequest {
+  string image_id = 1;
+  string owner_username = 2;
+}
+
+// Response containing the image
+message GetImageResponse {
+  bool success = 1;
+  optional ImageMetadata image = 2;
+}
+
 // DirectoryOfService provides methods to query the directory for peers and requests.
 service DirectoryOfService {
   // Register a peer with the directory service.
@@ -144,4 +263,30 @@ service DirectoryOfService {
   
   // Check if two users are friends.
   rpc CheckFriendship(CheckFriendshipRequest) returns (CheckFriendshipResponse);
+  
+  // ===== IMAGE STORAGE METHODS =====
+  
+  // Save an image to the server
+  rpc SaveImage(SaveImageRequest) returns (SaveImageResponse);
+  
+  // Get all images owned by a user
+  rpc GetUserImages(GetUserImagesRequest) returns (GetUserImagesResponse);
+  
+  // Get all images shared with a user
+  rpc GetSharedImages(GetSharedImagesRequest) returns (GetSharedImagesResponse);
+  
+  // Update shared access for an image
+  rpc UpdateSharedAccess(UpdateSharedAccessRequest) returns (UpdateSharedAccessResponse);
+  
+  // Remove shared access for an image
+  rpc RemoveSharedAccess(RemoveSharedAccessRequest) returns (RemoveSharedAccessResponse);
+  
+  // Increment view count for an image
+  rpc IncrementViewCount(IncrementViewCountRequest) returns (IncrementViewCountResponse);
+  
+  // Delete an image
+  rpc DeleteImage(DeleteImageRequest) returns (DeleteImageResponse);
+  
+  // Get a specific image
+  rpc GetImage(GetImageRequest) returns (GetImageResponse);
 }
